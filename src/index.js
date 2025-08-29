@@ -1405,9 +1405,9 @@ const adminHtml = `<!DOCTYPE html>
             tasks.sort((a, b) => a.day - b.day || a.slot.localeCompare(b.slot) || a.startTime.localeCompare(b.startTime));
             tasks.forEach(task => {
                 const row = tableBody.insertRow();
-                row.insertCell().textContent = task.title;
                 row.insertCell().textContent = getWeekdayString(task.day);
                 row.insertCell().textContent = getSlotString(task.slot);
+                row.insertCell().textContent = task.title;
                 row.insertCell().textContent = task.startTime;
                 row.insertCell().textContent = task.endTime;
                 row.insertCell().textContent = getPriorityString(task.priority);
@@ -1743,12 +1743,6 @@ const loginHtml = `<!DOCTYPE html>
                 errorMessage.style.display = 'block';
             }
         });
-
-        // If the user has a cookie, skip the login page.
-        const hasCookie = document.cookie.split(';').some((item) => item.trim().startsWith('auth_token='));
-        if (hasCookie) {
-            window.location.href = '/admin.html';
-        }
     </script>
 </body>
 </html>`;
@@ -1973,7 +1967,8 @@ export default {
             if (env.ADMIN_PASSWORD && password === env.ADMIN_PASSWORD) {
                 // Set the authentication cookie on successful login
                 const headers = new Headers();
-                headers.append('Set-Cookie', `auth_token=${env.ADMIN_PASSWORD}; Path=/; HttpOnly; Max-Age=3600`);
+                // Removed HttpOnly flag to allow client-side JS to read the cookie
+                headers.append('Set-Cookie', `auth_token=${env.ADMIN_PASSWORD}; Path=/; Max-Age=3600`);
                 headers.append('Content-Type', 'text/plain');
                 return new Response('Login successful', { status: 200, headers: headers });
             } else {
