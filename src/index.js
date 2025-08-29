@@ -1,5 +1,7 @@
-// src/index.js
-// 这个文件与之前提供的一模一样
+// This script is a self-contained Cloudflare Worker that serves a weekly planner HTML page.
+// It uses KV for data storage and is designed to be deployed via the Cloudflare dashboard.
+
+// A template literal containing the complete HTML, CSS, and client-side JavaScript.
 const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -925,7 +927,7 @@ const html = `<!DOCTYPE html>
 
         async function saveTasksToKV() {
             try {
-                const response = await fetch(`${API_BASE}/tasks`, {
+                const response = await fetch(\`\${API_BASE}/tasks\`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(tasks)
@@ -941,7 +943,7 @@ const html = `<!DOCTYPE html>
 
         async function loadTasksFromKV() {
             try {
-                const response = await fetch(`${API_BASE}/tasks`);
+                const response = await fetch(\`\${API_BASE}/tasks\`);
                 if (response.ok) {
                     const data = await response.json();
                     tasks = data || [];
@@ -958,7 +960,7 @@ const html = `<!DOCTYPE html>
 
         async function clearAllDataFromKV() {
             try {
-                const response = await fetch(`${API_BASE}/clear`, { method: 'POST' });
+                const response = await fetch(\`\${API_BASE}/clear\`, { method: 'POST' });
                 if (response.ok) {
                     showToast('已清空所有数据！', 'success');
                     tasks = [];
@@ -983,7 +985,7 @@ const html = `<!DOCTYPE html>
 
             tasks.forEach(task => {
                 const taskCard = document.createElement('div');
-                taskCard.className = `task-card ${task.done ? 'done' : ''} ${task.priority === 1 ? 'high-priority' : task.priority === 2 ? 'medium-priority' : 'low-priority'}`;
+                taskCard.className = \`task-card \${task.done ? 'done' : ''} \${task.priority === 1 ? 'high-priority' : task.priority === 2 ? 'medium-priority' : 'low-priority'}\`;
                 taskCard.id = task.id;
                 taskCard.draggable = true;
                 taskCard.setAttribute('data-id', task.id);
@@ -992,15 +994,15 @@ const html = `<!DOCTYPE html>
                 taskCard.setAttribute('data-repeat-type', task.repeatType);
                 taskCard.setAttribute('data-weekdays', task.weekdays.join(','));
 
-                taskCard.innerHTML = `
-                    <input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''} onclick="toggleTaskCompletion('${task.id}', event)">
+                taskCard.innerHTML = \`
+                    <input type="checkbox" class="task-checkbox" \${task.done ? 'checked' : ''} onclick="toggleTaskCompletion('\${task.id}', event)">
                     <div class="task-actions">
-                        <button class="delete-btn" onclick="deleteTask('${task.id}', event)">&times;</button>
+                        <button class="delete-btn" onclick="deleteTask('\${task.id}', event)">&times;</button>
                     </div>
-                    <div class="task-title">${task.title}</div>
-                    <div class="task-time">${task.startTime}-${task.endTime}</div>
-                    <div class="task-note">${task.note}</div>
-                `;
+                    <div class="task-title">\${task.title}</div>
+                    <div class="task-time">\${task.startTime}-\${task.endTime}</div>
+                    <div class="task-note">\${task.note}</div>
+                \`;
 
                 // 阻止事件冒泡到父级以打开模态框
                 taskCard.querySelector('.task-checkbox').addEventListener('click', (e) => e.stopPropagation());
@@ -1017,7 +1019,7 @@ const html = `<!DOCTYPE html>
                 if (task.slot === 'pool') {
                     document.getElementById('taskPool').appendChild(taskCard);
                 } else {
-                    const cell = document.querySelector(`.task-cell[data-day="${task.day}"][data-slot="${task.slot}"]`);
+                    const cell = document.querySelector(\`.task-cell[data-day="\${task.day}"][data-slot="\${task.slot}"]\`);
                     if (cell) {
                         cell.appendChild(taskCard);
                     }
@@ -1025,21 +1027,6 @@ const html = `<!DOCTYPE html>
             });
 
             addAddTaskButtons();
-        }
-
-        function addAddTaskButtons() {
-            document.querySelectorAll('.task-cell').forEach(cell => {
-                const button = document.createElement('button');
-                button.className = 'add-task-btn';
-                button.textContent = '+';
-                const day = cell.getAttribute('data-day');
-                const slot = cell.getAttribute('data-slot');
-                button.onclick = (event) => {
-                    event.stopPropagation();
-                    addTask(day, slot);
-                };
-                cell.appendChild(button);
-            });
         }
 
         function addTask(day, slot) {
@@ -1157,9 +1144,9 @@ const html = `<!DOCTYPE html>
                 startInput.value = task.startTime;
                 endInput.value = task.endTime;
                 noteInput.value = task.note;
-                document.querySelector(`.priority-btn[data-priority="${task.priority}"]`).classList.add('active');
+                document.querySelector(\`.priority-btn[data-priority="\${task.priority}"]\`).classList.add('active');
                 task.weekdays.forEach(day => {
-                    const btn = document.querySelector(`.weekday-btn[data-day="${day}"]`);
+                    const btn = document.querySelector(\`.weekday-btn[data-day="\${day}"]\`);
                     if (btn) btn.classList.add('active');
                 });
             }
@@ -1220,11 +1207,11 @@ const html = `<!DOCTYPE html>
             document.querySelectorAll('.priority-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            document.querySelector(`.priority-btn[data-priority="${priority}"]`).classList.add('active');
+            document.querySelector(\`.priority-btn[data-priority="\${priority}"]\`).classList.add('active');
         }
 
         function toggleWeekday(day) {
-            const btn = document.querySelector(`.weekday-btn[data-day="${day}"]`);
+            const btn = document.querySelector(\`.weekday-btn[data-day="\${day}"]\`);
             btn.classList.toggle('active');
         }
 
@@ -1239,7 +1226,7 @@ const html = `<!DOCTYPE html>
         function exportToExcel() {
             const today = new Date();
             const dateStr = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
-            const filename = `weekly_plan_${dateStr}.csv`;
+            const filename = \`weekly_plan_\${dateStr}.csv\`;
             const header = ['星期', '时段', '任务标题', '开始时间', '结束时间', '优先级', '是否完成', '备注'];
             const rows = tasks.map(task => [
                 getWeekdayString(task.day),
@@ -1252,7 +1239,7 @@ const html = `<!DOCTYPE html>
                 task.note
             ]);
             
-            const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + header.map(e => `"${e}"`).join(',') + '\n' + rows.map(row => row.map(e => `"${e}"`).join(',')).join('\n');
+            const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + header.map(e => \`"\${e}"\`).join(',') + '\\n' + rows.map(row => row.map(e => \`"\${e}"\`).join(',')).join('\\n');
             const link = document.createElement('a');
             link.setAttribute('href', csvContent);
             link.setAttribute('download', filename);
@@ -1275,7 +1262,7 @@ const html = `<!DOCTYPE html>
         }
 
         function importTasksFromCSV(csvString) {
-            const lines = csvString.split('\n').map(line => line.trim()).filter(line => line);
+            const lines = csvString.split('\\n').map(line => line.trim()).filter(line => line);
             const importedTasks = [];
             const header = lines[0].split(',').map(h => h.replace(/"/g, ''));
             const headerMap = {
@@ -1315,7 +1302,7 @@ const html = `<!DOCTYPE html>
             tasks = [...tasks, ...importedTasks];
             saveTasksToKV();
             renderTasks();
-            showToast(`成功导入 ${importedTasks.length} 个任务`, 'success');
+            showToast(\`成功导入 \${importedTasks.length} 个任务\`, 'success');
             closeImportModal();
         }
 
@@ -1460,7 +1447,7 @@ const html = `<!DOCTYPE html>
             const endOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 7);
             const startStr = startOfWeek.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
             const endStr = endOfWeek.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
-            weekInfo.textContent = `本周：${startStr} - ${endStr}`;
+            weekInfo.textContent = \`本周：\${startStr} - \${endStr}\`;
             
             // 高亮今天的星期
             document.querySelectorAll('.day-header').forEach(header => {
@@ -1485,7 +1472,7 @@ const html = `<!DOCTYPE html>
         
         async function loadSettings() {
             try {
-                const response = await fetch(`${API_BASE}/settings`);
+                const response = await fetch(\`\${API_BASE}/settings\`);
                 if (response.ok) {
                     const settings = await response.json();
                     if (settings && settings.theme) {
@@ -1499,7 +1486,7 @@ const html = `<!DOCTYPE html>
         
         async function saveSettingsToKV(settings) {
             try {
-                await fetch(`${API_BASE}/settings`, {
+                await fetch(\`\${API_BASE}/settings\`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(settings)
@@ -1558,72 +1545,64 @@ const csvTemplate = `星期,时段,任务标题,开始时间,结束时间,优先
 `;
 
 
-async function handleRequest(request, env) {
-  const url = new URL(request.url);
-  const path = url.pathname;
-
-  // KV API 路由
-  if (path === '/api/tasks') {
-    if (request.method === 'POST') {
-      const tasks = await request.json();
-      await env.TASK_KV.put('tasks', JSON.stringify(tasks));
-      return new Response('Tasks saved', { status: 200 });
-    } else if (request.method === 'GET') {
-      const tasks = await env.TASK_KV.get('tasks');
-      return new Response(tasks, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-  }
-
-  if (path === '/api/clear') {
-    if (request.method === 'POST') {
-      await env.TASK_KV.delete('tasks');
-      return new Response('Data cleared', { status: 200 });
-    }
-  }
-
-  if (path === '/api/settings') {
-    if (request.method === 'POST') {
-      const settings = await request.json();
-      await env.TASK_KV.put('settings', JSON.stringify(settings));
-      return new Response('Settings saved', { status: 200 });
-    } else if (request.method === 'GET') {
-      const settings = await env.TASK_KV.get('settings');
-      return new Response(settings, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-  }
-
-  // 静态文件服务
-  if (path === '/') {
-    return new Response(html, {
-      headers: { 'content-type': 'text/html;charset=UTF-8' },
-    });
-  } else if (path === '/index.html') {
-    return new Response(html, {
-      headers: { 'content-type': 'text/html;charset=UTF-8' },
-    });
-  } else if (path === '/manifest.json') {
-    return new Response(manifest, {
-      headers: { 'content-type': 'application/json;charset=UTF-8' },
-    });
-  } else if (path === '/weekly_template.csv') {
-    return new Response(csvTemplate, {
-      headers: { 'content-type': 'text/csv;charset=UTF-8' },
-    });
-  }
-
-  return new Response('Not Found', { status: 404 });
-}
-
 export default {
-  async fetch(request, env) {
-    try {
-      return await handleRequest(request, env);
-    } catch (e) {
-      return new Response(e.message, { status: 500 });
-    }
-  },
+    async fetch(request, env) {
+        const url = new URL(request.url);
+        const path = url.pathname;
+
+        // KV API 路由
+        if (path === '/api/tasks') {
+            if (request.method === 'POST') {
+                const tasks = await request.json();
+                await env.TASK_KV.put('tasks', JSON.stringify(tasks));
+                return new Response('Tasks saved', { status: 200 });
+            } else if (request.method === 'GET') {
+                const tasks = await env.TASK_KV.get('tasks');
+                return new Response(tasks, {
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        }
+
+        if (path === '/api/clear') {
+            if (request.method === 'POST') {
+                await env.TASK_KV.delete('tasks');
+                return new Response('Data cleared', { status: 200 });
+            }
+        }
+
+        if (path === '/api/settings') {
+            if (request.method === 'POST') {
+                const settings = await request.json();
+                await env.TASK_KV.put('settings', JSON.stringify(settings));
+                return new Response('Settings saved', { status: 200 });
+            } else if (request.method === 'GET') {
+                const settings = await env.TASK_KV.get('settings');
+                return new Response(settings, {
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        }
+
+        // 静态文件服务
+        if (path === '/') {
+            return new Response(html, {
+                headers: { 'content-type': 'text/html;charset=UTF-8' },
+            });
+        } else if (path === '/index.html') {
+            return new Response(html, {
+                headers: { 'content-type': 'text/html;charset=UTF-8' },
+            });
+        } else if (path === '/manifest.json') {
+            return new Response(manifest, {
+                headers: { 'content-type': 'application/json;charset=UTF-8' },
+            });
+        } else if (path === '/weekly_template.csv') {
+            return new Response(csvTemplate, {
+                headers: { 'content-type': 'text/csv;charset=UTF-8' },
+            });
+        }
+
+        return new Response('Not Found', { status: 404 });
+    },
 };
