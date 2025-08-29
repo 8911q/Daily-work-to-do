@@ -1,0 +1,13 @@
+name = "weekly-planner-worker"
+main = "src/index.js"
+compatibility_date = "2025-08-29"
+
+[vars]
+# 这里的 KV 命名空间 ID 必须替换成你在 Cloudflare 控制台创建的 ID
+TASK_KV = "YOUR_KV_NAMESPACE_ID"
+
+[d1_databases]
+# 如果你想使用 D1，在这里配置
+# binding = "DB"
+# database_name = "weekly_planner_db"
+# database_id = "YOUR_D1_DATABASE_ID"
