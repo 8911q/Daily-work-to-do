@@ -33,6 +33,7 @@
 	Wrangler 将自动将您的代码和文件部署到 Cloudflare，并绑定您的 KV 存储。
 
 部署成功后，您就可以通过Worker的URL访问您的每日工作计划应用了。
+
 8. 后台管理
 	增加环境变量```ADMIN_PASSWORD```为后台管理密码
  	后台按理页面```/admin.html```
