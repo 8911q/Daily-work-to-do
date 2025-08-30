@@ -1254,9 +1254,9 @@ const adminHtml = `<!DOCTYPE html>
         <table class="tasks-table">
             <thead>
                 <tr>
-                    <th>标题</th>
                     <th>星期</th>
                     <th>时段</th>
+                    <th>任务标题</th>
                     <th>开始时间</th>
                     <th>结束时间</th>
                     <th>优先级</th>
@@ -1567,8 +1567,15 @@ const adminHtml = `<!DOCTYPE html>
             currentTaskId = null;
             
             document.getElementById('modalTitle').textContent = mode === 'add' ? '添加任务' : '编辑任务';
-            
-            if (mode === 'edit') {
+
+            if (mode === 'add') {
+                 // Set default time for new tasks to avoid validation issues
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                document.getElementById('taskStart').value = \`\${hours}:\${minutes}\`;
+                document.getElementById('taskEnd').value = \`\${hours}:\${minutes}\`;
+            } else if (mode === 'edit') {
                 const task = tasks.find(t => t.id === id);
                 if (task) {
                     currentTaskId = task.id;
@@ -1975,6 +1982,16 @@ export default {
                 return new Response('Unauthorized', { status: 401 });
             }
         }
+        
+        // --- 修改部分开始 ---
+        // 允许主页无认证访问 /api/tasks 获取任务列表
+        if (path === '/api/tasks' && request.method === 'GET') {
+            const tasks = await env.TASK_KV.get('tasks');
+            return new Response(tasks || '[]', {
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+        // --- 修改部分结束 ---
 
         // Authentication middleware
         const authToken = cookies && cookies.split(';').map(s => s.trim()).find(s => s.startsWith('auth_token='));
